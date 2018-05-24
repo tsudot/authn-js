@@ -63,9 +63,15 @@ KeratinAuthN.setLocalStorageStore(name: string): void
 Use the following API methods to integrate your AuthN service:
 
 ```javascript
-// Check the configured storage for an existing session. Refresh it if necessary.
-// The promise is fulfilled if a session is restored.
+// Check the configured storage for an existing session. If a session is found but might be stale,
+// then refresh it. The promise is fulfilled if a session is restored.
 KeratinAuthN.restoreSession(): Promise<void>
+```
+
+```javascript
+// Attempt to import a session from AuthN. This is a more aggressive strategy than restoreSession,
+// because it does not check for an existing session before invoking the refresh API.
+KeratinAuthN.importSession(): Promise<void>
 ```
 
 ```javascript
@@ -93,7 +99,8 @@ KeratinAuthN.logout(): Promise<void>
 ```
 
 ```javascript
-// Returns a Promise that is fulfilled with an indication whether the username is available or has been claimed.
+// Returns a Promise that is fulfilled with a boolean indicating whether the username is available.
+// The promise rejects when availability can not be determined, as with network errors.
 KeratinAuthN.isAvailable(username: string): Promise<boolean>
 ```
 

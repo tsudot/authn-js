@@ -136,9 +136,8 @@ QUnit.test("name is taken", function(assert) {
   );
 
   return KeratinAuthN.isAvailable('test')
-    .then(refuteSuccess(assert))
-    .catch(function(errors) {
-      assert.deepEqual(errors, [{field: 'username', message: 'TAKEN'}]);
+    .then(function (availability) {
+      assert.notOk(availability, "is taken")
     });
 });
 
@@ -223,6 +222,21 @@ QUnit.test("malformed JWT", function(assert) {
     .then(refuteSuccess(assert))
     .catch(function (e) {
       assert.equal(e, 'Malformed JWT: invalid encoding');
+    });
+});
+
+QUnit.module("importSession", startServer);
+QUnit.test("no existing session", function(assert) {
+  deleteCookie('authn');
+  var newSession = idToken({age: 1});
+
+  this.server.respondWith('GET', 'https://authn.example.com/session/refresh',
+    jsonResult({id_token: newSession})
+  );
+
+  return KeratinAuthN.importSession()
+    .then(function () {
+      assert.equal(KeratinAuthN.session(), newSession, "session re-established");
     });
 });
 
